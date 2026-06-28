@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nexus Control Panel</title>
+    
+    <!-- Telegram Web App API -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-center: #0f172a;
+            --bg-edge: #000000;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            
+            --grad-red: linear-gradient(135deg, #ff4b2b 0%, #ff416c 100%);
+            --grad-blue: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+            --grad-green: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --grad-dark: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            --grad-purple: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+            --grad-orange: linear-gradient(135deg, #f12711 0%, #f5af19 100%);
+            
+            --glow-red: rgba(255, 65, 108, 0.5);
+            --glow-blue: rgba(0, 114, 255, 0.5);
+            --glow-green: rgba(56, 239, 125, 0.5);
+            --glow-dark: rgba(75, 108, 183, 0.4);
+            --glow-purple: rgba(142, 45, 226, 0.5);
+            --glow-orange: rgba(241, 39, 17, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px 16px;
+        }
+
+        /* Космический фон (Stars & Nebula) */
+        .space-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1;
+            background: #030712; /* Очень глубокий темно-синий/черный */
+            overflow: hidden;
+        }
+
+        /* Мелкие звезды (Медленные) */
+        .stars-1 {
+            position: absolute;
+            top: -100%; left: -100%; width: 300%; height: 300%;
+            background-image: 
+                radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 40px 70px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 90px 40px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 160px 120px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 250px 90px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 300px 200px, #ffffff, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 350px 350px;
+            animation: moveStars 120s linear infinite;
+        }
+
+        /* Крупные звезды (Быстрые) */
+        .stars-2 {
+            position: absolute;
+            top: -100%; left: -100%; width: 300%; height: 300%;
+            background-image: 
+                radial-gradient(2px 2px at 50px 160px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 150px 30px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 280px 100px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+                radial-gradient(3px 3px at 350px 250px, rgba(255,255,255,0.8), rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 400px 400px;
+            animation: moveStars 80s linear infinite;
+        }
+
+        /* Легкое свечение туманностей */
+        .nebula {
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: 
+                radial-gradient(circle at 30% 70%, rgba(74, 0, 224, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 30%, rgba(0, 242, 254, 0.08) 0%, transparent 50%);
+            animation: rotateNebula 60s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes moveStars {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(20%); } /* Медленно плывут вниз */
+        }
+
+        @keyframes rotateNebula {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .card-title {
+            font-size: 14px;
+            color: #fff;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #00f2fe;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00f2fe;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .btn-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .btn-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .app-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .app-icon {
+            font-size: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .app-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            border: none;
+            outline: none;
+            border-radius: 14px;
+            padding: 14px 10px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:active {
+            transform: scale(0.92);
+            transition: 0.1s;
+        }
+
+        button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg);
+            transition: 0.5s;
+        }
+        button:hover::after {
+            left: 150%;
+        }
+
+        .btn-danger { background: var(--grad-red); }
+        .btn-danger:hover { box-shadow: 0 8px 25px var(--glow-red); }
+
+        .btn-primary { background: var(--grad-blue); }
+        .btn-primary:hover { box-shadow: 0 8px 25px var(--glow-blue); }
+
+        .btn-warning { background: var(--grad-orange); }
+        .btn-warning:hover { box-shadow: 0 8px 25px var(--glow-orange); }
+
+        .btn-lock { background: var(--grad-purple); }
+        .btn-lock:hover { box-shadow: 0 8px 25px var(--glow-purple); }
+
+        .btn-sm {
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+        .btn-play { background: var(--grad-green); }
+        .btn-play:hover { box-shadow: 0 6px 20px var(--glow-green); }
+
+        .btn-stop { background: var(--grad-dark); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-stop:hover { box-shadow: 0 6px 20px var(--glow-dark); }
+        
+        .btn-neutral { background: var(--grad-dark); }
+        .btn-neutral:hover { box-shadow: 0 8px 25px var(--glow-dark); }
+
+        /* Overlays (Модальные окна) */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .overlay-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 30px 20px;
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .overlay-title {
+            font-size: 16px;
+            letter-spacing: 2px;
+            font-weight: 700;
+            color: #ef4444;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+        }
+        
+        .timer-title {
+            color: #00f2fe;
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
+        }
+
+        .overlay-text {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+
+        .overlay-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* Таймер */
+        .timer-count {
+            font-size: 80px;
+            font-weight: 900;
+            color: #ff416c;
+            text-shadow: 0 0 30px rgba(255, 65, 108, 0.6);
+            margin: 20px 0 30px 0;
+            line-height: 1;
+        }
+
+        @media (max-width: 380px) {
+            .btn-grid { grid-template-columns: 1fr; }
+            .btn-row { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .app-actions { width: 100%; }
+            .app-actions button { flex: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SPACE ANIMATED BACKGROUND -->
+    <div class="space-bg">
+        <div class="nebula"></div>
+        <div class="stars-1"></div>
+        <div class="stars-2"></div>
+    </div>
+
+    <!-- OVERLAY: Confirm Action -->
+    <div id="confirm-overlay" class="overlay">
+        <div class="overlay-card">
+            <div class="overlay-title">SYSTEM WARNING</div>
+            <div class="overlay-text">ARE YOU SURE?</div>
+            <div class="overlay-buttons">
+                <button class="btn-danger" onclick="handleConfirm(true)">YES</button>
+                <button class="btn-neutral" onclick="handleConfirm(false)">NO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- OVERLAY: Timer Countdown -->
+    <div id="timer-overlay" class="overlay">
+        <div class="overlay-card">
+            <div class="overlay-title timer-title">ACTION INITIATED. EXECUTING IN:</div>
+            <div id="timer-count" class="timer-count">10</div>
+            <button class="btn-danger" style="width: 100%; padding: 18px;" onclick="abortTimer()">ABORT</button>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div class="container">
+        <div class="header">
+            <h1>Nexus Control</h1>
+            <p>COMMAND CENTER</p>
+        </div>
+
+        <!-- Блок Питания -->
+        <div class="card">
+            <div class="card-title">SYSTEM</div>
+            <div class="btn-grid">
+                <!-- Кнопки с таймером -->
+                <button class="btn-danger" onclick="confirmSystemAction('/shutdown')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg> Shutdown
+                </button>
+                <button class="btn-primary" onclick="confirmSystemAction('/reboot')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg> Restart
+                </button>
+                
+                <!-- Мгновенные кнопки -->
+                <button class="btn-lock" style="grid-column: 1 / -1;" onclick="sendCmd('/lock_pc')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Lock PC
+                </button>
+            </div>
+        </div>
+
+        <!-- Блок Софта -->
+        <div class="card">
+            <div class="card-title">APPLICATIONS</div>
+            
+            <div class="btn-row">
+                <div class="app-info">
+                    <div class="app-icon"><img src="https://cdn.simpleicons.org/steam/white" width="22" height="22" alt="Steam"></div>
+                    Steam
+                </div>
+                <div class="app-actions">
+                    <button class="btn-sm btn-play" onclick="sendCmd('/startsteam')">Launch</button>
+                    <button class="btn-sm btn-stop" onclick="sendCmd('/killsteam')">Kill</button>
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <div class="app-info">
+                    <div class="app-icon"><img src="https://cdn.simpleicons.org/epicgames/white" width="22" height="22" alt="Epic"></div>
+                    Epic Games
+                </div>
+                <div class="app-actions">
+                    <button class="btn-sm btn-play" onclick="sendCmd('/startepic')">Launch</button>
+                    <button class="btn-sm btn-stop" onclick="sendCmd('/killepic')">Kill</button>
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <div class="app-info">
+                    <div class="app-icon"><img src="https://cdn.simpleicons.org/anydesk/white" width="22" height="22" alt="AnyDesk"></div>
+                    AnyDesk
+                </div>
+                <div class="app-actions">
+                    <button class="btn-sm btn-play" onclick="sendCmd('/startanydesk')">Launch</button>
+                    <button class="btn-sm btn-stop" onclick="sendCmd('/killanydesk')">Kill</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.setHeaderColor('#0f172a');
+        tg.setBackgroundColor('#000000');
+
+        let pendingCommand = null;
+        let countdownTimer = null;
+        let timeRemaining = 10;
+
+        // Мгновенная отправка (для обычных кнопок)
+        function sendCmd(cmd) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            tg.sendData(cmd);
+            setTimeout(() => tg.close(), 300);
+        }
+
+        // ШАГ 1: Показать окно подтверждения
+        function confirmSystemAction(cmd) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            pendingCommand = cmd;
+            document.getElementById('confirm-overlay').style.display = 'flex';
+        }
+
+        // ШАГ 2 & 3: Обработка YES/NO
+        function handleConfirm(isConfirmed) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('confirm-overlay').style.display = 'none';
+            
+            if (isConfirmed) {
+                startTimer();
+            } else {
+                pendingCommand = null;
+            }
+        }
+
+        // Запуск таймера
+        function startTimer() {
+            timeRemaining = 10;
+            document.getElementById('timer-count').innerText = timeRemaining;
+            document.getElementById('timer-overlay').style.display = 'flex';
+            
+            countdownTimer = setInterval(() => {
+                timeRemaining--;
+                document.getElementById('timer-count').innerText = timeRemaining;
+                
+                // Тактильная отдача на каждую секунду, если нужно (оставлю без нее для тишины,
+                // но можно добавить tg.HapticFeedback.selectionChanged() )
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(countdownTimer);
+                    executePendingCommand();
+                }
+            }, 1000);
+        }
+
+        // ШАГ 4: Кнопка ABORT внутри таймера
+        function abortTimer() {
+            // Вызов вибрации ошибки/предупреждения
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+            
+            clearInterval(countdownTimer);
+            document.getElementById('timer-overlay').style.display = 'none';
+            pendingCommand = null;
+        }
+
+        // ШАГ 5: Финальное исполнение
+        function executePendingCommand() {
+            if (pendingCommand) {
+                tg.sendData(pendingCommand);
+                setTimeout(() => tg.close(), 300);
+            }
+        }
+    </script>
+</body>
+</html>
