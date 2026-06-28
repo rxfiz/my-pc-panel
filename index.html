@@ -57,11 +57,10 @@
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
             z-index: -1;
-            background: #030712; /* Очень глубокий темно-синий/черный */
+            background: #030712; 
             overflow: hidden;
         }
 
-        /* Мелкие звезды (Медленные) */
         .stars-1 {
             position: absolute;
             top: -100%; left: -100%; width: 300%; height: 300%;
@@ -77,7 +76,6 @@
             animation: moveStars 120s linear infinite;
         }
 
-        /* Крупные звезды (Быстрые) */
         .stars-2 {
             position: absolute;
             top: -100%; left: -100%; width: 300%; height: 300%;
@@ -91,7 +89,6 @@
             animation: moveStars 80s linear infinite;
         }
 
-        /* Легкое свечение туманностей */
         .nebula {
             position: absolute;
             top: -50%; left: -50%; width: 200%; height: 200%;
@@ -104,7 +101,7 @@
 
         @keyframes moveStars {
             0% { transform: translateY(0); }
-            100% { transform: translateY(20%); } /* Медленно плывут вниз */
+            100% { transform: translateY(20%); }
         }
 
         @keyframes rotateNebula {
@@ -118,7 +115,25 @@
             display: flex;
             flex-direction: column;
             gap: 28px;
+            position: relative;
         }
+
+        /* Settings Gear Icon */
+        .settings-btn {
+            position: absolute;
+            top: 0px; right: 0px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-radius: 50%;
+            width: 44px; height: 44px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            z-index: 50;
+            transition: all 0.2s;
+        }
+        .settings-btn:hover { background: rgba(255, 255, 255, 0.15); transform: rotate(45deg); }
+        .settings-btn svg { width: 20px; height: 20px; }
 
         .header {
             text-align: center;
@@ -332,6 +347,12 @@
             color: #00f2fe;
             text-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
         }
+        
+        .setup-title {
+            color: #00f2fe;
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
+            margin-bottom: 5px;
+        }
 
         .overlay-text {
             font-size: 22px;
@@ -344,6 +365,23 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
+        }
+
+        .input-field {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            padding: 16px;
+            border-radius: 14px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .input-field:focus {
+            border-color: #00f2fe;
+            box-shadow: 0 0 15px rgba(0,242,254,0.3);
         }
 
         /* Таймер */
@@ -373,6 +411,18 @@
         <div class="stars-2"></div>
     </div>
 
+    <!-- OVERLAY: System Setup -->
+    <div id="settings-overlay" class="overlay">
+        <div class="overlay-card">
+            <div class="overlay-title setup-title">SYSTEM SETUP</div>
+            <div class="overlay-text" style="font-size: 13px; margin-bottom: 20px; color: #94a3b8; font-weight: 500;">ENTER CREDENTIALS TO CONNECT</div>
+            <input type="text" id="bot-token" class="input-field" placeholder="Bot Token">
+            <input type="text" id="chat-id" class="input-field" placeholder="Chat ID">
+            <button class="btn-play" style="width: 100%; padding: 18px; margin-top: 10px;" onclick="saveSettings()">SAVE AND INITIALIZE</button>
+            <button class="btn-stop" id="btn-logout" style="width: 100%; padding: 16px; margin-top: 12px; display: none;" onclick="clearSettings()">CLEAR (LOGOUT)</button>
+        </div>
+    </div>
+
     <!-- OVERLAY: Confirm Action -->
     <div id="confirm-overlay" class="overlay">
         <div class="overlay-card">
@@ -396,6 +446,11 @@
 
     <!-- MAIN DASHBOARD -->
     <div class="container">
+        
+        <button class="settings-btn" onclick="openSettings()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
+
         <div class="header">
             <h1>Nexus Control</h1>
             <p>COMMAND CENTER</p>
@@ -414,7 +469,7 @@
                 </button>
                 
                 <!-- Мгновенные кнопки -->
-                <button class="btn-lock" style="grid-column: 1 / -1;" onclick="sendCmd('/lock_pc')">
+                <button class="btn-lock" style="grid-column: 1 / -1;" onclick="sendCmd('/lock_pc', this)">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Lock PC
                 </button>
             </div>
@@ -430,8 +485,8 @@
                     Steam
                 </div>
                 <div class="app-actions">
-                    <button class="btn-sm btn-play" onclick="sendCmd('/startsteam')">Launch</button>
-                    <button class="btn-sm btn-stop" onclick="sendCmd('/killsteam')">Kill</button>
+                    <button class="btn-sm btn-play" onclick="sendCmd('/launch_steam', this)">Launch</button>
+                    <button class="btn-sm btn-stop" onclick="sendCmd('/kill_steam', this)">Kill</button>
                 </div>
             </div>
 
@@ -441,8 +496,8 @@
                     Epic Games
                 </div>
                 <div class="app-actions">
-                    <button class="btn-sm btn-play" onclick="sendCmd('/startepic')">Launch</button>
-                    <button class="btn-sm btn-stop" onclick="sendCmd('/killepic')">Kill</button>
+                    <button class="btn-sm btn-play" onclick="sendCmd('/launch_epic', this)">Launch</button>
+                    <button class="btn-sm btn-stop" onclick="sendCmd('/kill_epic', this)">Kill</button>
                 </div>
             </div>
 
@@ -452,8 +507,8 @@
                     AnyDesk
                 </div>
                 <div class="app-actions">
-                    <button class="btn-sm btn-play" onclick="sendCmd('/startanydesk')">Launch</button>
-                    <button class="btn-sm btn-stop" onclick="sendCmd('/killanydesk')">Kill</button>
+                    <button class="btn-sm btn-play" onclick="sendCmd('/launch_anydesk', this)">Launch</button>
+                    <button class="btn-sm btn-stop" onclick="sendCmd('/kill_anydesk', this)">Kill</button>
                 </div>
             </div>
         </div>
@@ -462,18 +517,87 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.setHeaderColor('#0f172a');
+        tg.setHeaderColor('#030712');
         tg.setBackgroundColor('#000000');
+
+        let botToken = localStorage.getItem('bot_token') || '';
+        let chatId = localStorage.getItem('chat_id') || '';
+
+        // Проверяем авторизацию при загрузке
+        if (!botToken || !chatId) {
+            document.getElementById('settings-overlay').style.display = 'flex';
+        }
+
+        function openSettings() {
+            document.getElementById('bot-token').value = botToken;
+            document.getElementById('chat-id').value = chatId;
+            document.getElementById('settings-overlay').style.display = 'flex';
+            if(botToken && chatId) {
+                document.getElementById('btn-logout').style.display = 'block';
+            }
+        }
+
+        function saveSettings() {
+            const tokenInput = document.getElementById('bot-token').value.trim();
+            const idInput = document.getElementById('chat-id').value.trim();
+            if (tokenInput && idInput) {
+                botToken = tokenInput;
+                chatId = idInput;
+                localStorage.setItem('bot_token', botToken);
+                localStorage.setItem('chat_id', chatId);
+                document.getElementById('settings-overlay').style.display = 'none';
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            } else {
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+            }
+        }
+
+        function clearSettings() {
+            localStorage.removeItem('bot_token');
+            localStorage.removeItem('chat_id');
+            botToken = '';
+            chatId = '';
+            document.getElementById('bot-token').value = '';
+            document.getElementById('chat-id').value = '';
+            document.getElementById('btn-logout').style.display = 'none';
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        }
 
         let pendingCommand = null;
         let countdownTimer = null;
         let timeRemaining = 10;
 
-        // Мгновенная отправка (для обычных кнопок)
-        function sendCmd(cmd) {
+        function sendCmd(cmd, btnElement) {
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-            tg.sendData(cmd);
-            setTimeout(() => tg.close(), 300);
+            
+            if (!botToken || !chatId) {
+                openSettings();
+                return;
+            }
+
+            // Визуальный отклик (вспышка зеленым на 1 сек)
+            if (btnElement) {
+                const originalBg = btnElement.style.background;
+                const originalShadow = btnElement.style.boxShadow;
+                
+                btnElement.style.background = '#10b981';
+                btnElement.style.boxShadow = '0 0 20px rgba(16,185,129,0.8)';
+                
+                setTimeout(() => {
+                    btnElement.style.background = originalBg;
+                    btnElement.style.boxShadow = originalShadow;
+                }, 1000);
+            }
+
+            // Отправка скрытого POST-запроса
+            fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: cmd
+                })
+            }).catch(err => console.error("Error:", err));
         }
 
         // ШАГ 1: Показать окно подтверждения
@@ -505,9 +629,6 @@
                 timeRemaining--;
                 document.getElementById('timer-count').innerText = timeRemaining;
                 
-                // Тактильная отдача на каждую секунду, если нужно (оставлю без нее для тишины,
-                // но можно добавить tg.HapticFeedback.selectionChanged() )
-                
                 if (timeRemaining <= 0) {
                     clearInterval(countdownTimer);
                     executePendingCommand();
@@ -517,19 +638,18 @@
 
         // ШАГ 4: Кнопка ABORT внутри таймера
         function abortTimer() {
-            // Вызов вибрации ошибки/предупреждения
             if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-            
             clearInterval(countdownTimer);
             document.getElementById('timer-overlay').style.display = 'none';
             pendingCommand = null;
         }
 
-        // ШАГ 5: Финальное исполнение
+        // ШАГ 5: Финальное исполнение после таймера
         function executePendingCommand() {
             if (pendingCommand) {
-                tg.sendData(pendingCommand);
-                setTimeout(() => tg.close(), 300);
+                sendCmd(pendingCommand, null);
+                document.getElementById('timer-overlay').style.display = 'none';
+                pendingCommand = null;
             }
         }
     </script>
